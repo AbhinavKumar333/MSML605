@@ -1,22 +1,20 @@
 import torch
 import torch.nn as nn
+from torchvision import models
 
+class VGG16Modified(nn.Module):
+    def __init__(self, num_classes=10, input_channels=1):
+        super(VGG16Modified, self).__init__()
 
-class CNN(nn.Module):
-    def __init__(self):
-        super(CNN, self).__init__()
-        # Two convolutional layers with ReLU activation and max pooling.
-        self.conv1 = nn.Conv2d(1, 32, kernel_size=3, padding=1)
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.relu = nn.ReLU()
-        self.fc1 = nn.Linear(64 * 7 * 7, 128)
-        self.fc2 = nn.Linear(128, 10)
+        # Load VGG-16 model
+        self.model = models.vgg16(pretrained=False)
+
+        # Modify the first conv layer to accept 1-channel input (e.g., for MNIST)
+        if input_channels == 1:
+            self.model.features[0] = nn.Conv2d(1, 64, kernel_size=3, padding=1)
+
+        # Modify the classifier to match the number of output classes
+        self.model.classifier[6] = nn.Linear(4096, num_classes)
 
     def forward(self, x):
-        x = self.pool(self.relu(self.conv1(x)))
-        x = self.pool(self.relu(self.conv2(x)))
-        x = x.view(x.size(0), -1)  # Flatten feature maps
-        x = self.relu(self.fc1(x))
-        x = self.fc2(x)
-        return x
+        return self.model(x)

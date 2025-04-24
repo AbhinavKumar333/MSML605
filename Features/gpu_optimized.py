@@ -1,41 +1,46 @@
 import torch
-import torch.optim as optim
 import torch.nn as nn
-from torch.utils.data import DataLoader
-from torchvision import datasets, transforms
-from Models.convolution_neural_network import CNN
-import time
+import torch.optim as optim
+from models.convolution_neural_network import VGG16Modified
+from data.loader import get_cifar10_loaders
+from evaluation.evaluate import evaluate
+from utils.plotting import plot_metrics
+from training.loop import train
+from config.defaults import config
 
-# Enable cuDNN autotuner to find the best algorithm for the current configuration.
-torch.backends.cudnn.benchmark = True
+import numpy as np
+import os
+from memory_profiler import memory_usage
 
-# Set device to GPU.
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = CNN().to(device)
+def train_gpu_model():
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    print(f"Running on {device.upper()}")
 
-optimizer = optim.Adam(model.parameters(), lr=0.001)
-criterion = nn.CrossEntropyLoss()
+    train_loader, test_loader = get_cifar10_loaders(
+        batch_size=config["batch_size"], data_dir=config["data_dir"]
+    )
 
-# Transformation and data loading with pinned memory.
-transform = transforms.Compose([
-    transforms.ToTensor(),
-    transforms.Normalize((0.1307,), (0.3081,))
-])
-train_dataset = datasets.MNIST('./data', train=True, download=True, transform=transform)
-train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True, pin_memory=True)
+    model = VGG16Modified(num_classes=config["num_classes"], input_channels=config["input_channels"]).to(device)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=config["learning_rate"])
 
-# Benchmark the training loop.
-start_time = time.time()
-model.train()
-for epoch in range(1):
-    for batch_idx, (data, target) in enumerate(train_loader):
-        # Use non-blocking transfers for performance.
-        data, target = data.to(device, non_blocking=True), target.to(device, non_blocking=True)
-        optimizer.zero_grad()
-        output = model(data)
-        loss = criterion(output, target)
-        loss.backward()
-        optimizer.step()
-end_time = time.time()
+    epoch_times = []
+    val_accuracies = []
 
-print("GPU Training time:", end_time - start_time)
+    for epoch in range(config["epochs"]):
+        loss, duration = train(model, train_loader, optimizer, criterion, device=device)
+        epoch_times.append(duration)
+        print(f"Epoch {epoch+1}/{config['epochs']} - Loss: {loss:.4f} - Time: {duration:.2f}s")
+
+        acc = evaluate(model, test_loader, device=device)
+        val_accuracies.append(acc)
+
+    print("\nTraining complete.")
+    print(f"Avg epoch time: {np.mean(epoch_times):.2f}s")
+    print(f"Final validation accuracy: {val_accuracies[-1]:.2f}%")
+
+    plot_metrics(epoch_times, val_accuracies)
+
+if __name__ == "__main__":
+    mem = memory_usage((train_gpu_model,), max_iterations=1)
+    print(f"Peak memory usage: {max(mem):.2f} MB")
