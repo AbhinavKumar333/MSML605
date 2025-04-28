@@ -1,6 +1,8 @@
 import argparse
 from experiments.cpu_batch_sweep import batch_size_sweep
 from experiments.optuna_tuning import run_optuna_tuning
+from experiments.gpu_batch_sweep import batch_size_sweep_gpu
+from experiments.gpu_optuna_tuning import run_gpu_optuna_tuning
 
 def main():
     parser = argparse.ArgumentParser(description="CPU Optimization Benchmark Driver")
@@ -19,6 +21,12 @@ def main():
 
     elif args.mode == 'tune':
         run_optuna_tuning()
+
+    elif args.mode == 'gpu_sweep':
+        batch_size_sweep_gpu()
+
+    elif args.mode == 'gpu_tune':
+        run_gpu_optuna_tuning()
 
     elif args.mode == 'single':
         from features.cpu_optimized import train_cpu_model
