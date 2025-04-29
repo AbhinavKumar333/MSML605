@@ -6,7 +6,6 @@ import os
 
 from models.convolution_neural_network import VGG16Modified
 from data.loader import get_cifar10_loaders
-from evaluation.evaluate import evaluate
 from training.loop import train
 from evaluation.benchmark import train_and_benchmark, benchmark_quantized
 
@@ -20,7 +19,12 @@ def train_cpu_model(batch_size=32, epochs=2, learning_rate=0.001, verbose=True):
         print(f"Running on CPU with {torch.get_num_threads()} threads")
         print("MKL Enabled in PyTorch:", torch.backends.mkl.is_available())
 
-    train_loader, test_loader = get_cifar10_loaders(batch_size=batch_size)
+    # Load CIFAR-10 (TEST)
+    train_loader, test_loader = get_cifar10_loaders(
+        batch_size=32,
+        resize_for_vgg= model_variant.lower() == "vgg16",
+        subset=False
+    )
 
     model = VGG16Modified(num_classes=10, input_channels=3).to("cpu")
 
@@ -51,7 +55,6 @@ def train_cpu_model(batch_size=32, epochs=2, learning_rate=0.001, verbose=True):
         "accuracy": stats["final_acc"],
         "quantized_accuracy": acc_quant
     }
-
 
 if __name__ == "__main__":
     train_cpu_model()
