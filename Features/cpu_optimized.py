@@ -25,7 +25,7 @@ def train_cpu_model(batch_size=32, epochs=2, learning_rate=0.001, verbose=True, 
     train_loader, test_loader = get_cifar10_loaders(
         batch_size=32,
         resize_for_vgg= model_variant.lower() == "vgg16",
-        subset=False
+        subset=True
     )
 
     # === Select model based on variant ===
