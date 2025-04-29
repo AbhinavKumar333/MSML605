@@ -1,6 +1,6 @@
 import optuna
-from utils.plotting import plot_comparison
-from features.cpu_optimized import train_cpu_model
+from Utils.plotting import plot_comparison
+from Features.cpu_optimized import train_cpu_model
 
 def objective(trial):
     batch_size = trial.suggest_categorical('batch_size', [8, 16, 32, 64, 128])

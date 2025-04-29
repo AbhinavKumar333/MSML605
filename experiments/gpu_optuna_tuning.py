@@ -1,6 +1,6 @@
 import optuna
-from features.gpu_optimized import train_gpu_model
-from utils.plotting import plot_optimization_history
+from Features.gpu_optimized import train_gpu_model
+from Utils.plotting import plot_optimization_history
 
 def objective(trial):
     batch_size = trial.suggest_categorical('batch_size', [16, 32, 64, 128])
