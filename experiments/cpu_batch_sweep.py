@@ -1,6 +1,8 @@
-from features.cpu_optimized import train_cpu_model
-from utils.printing import print_benchmark_table
-from utils.plotting import plot_benchmark_results, plot_metrics
+from Features.cpu_optimized import train_cpu_model
+from Utils.printing import print_benchmark_table
+# from Utils.plotting import plot_benchmark_results, plot_metrics
+from Utils.plotting import plot_batchsize_sweep, plot_training_metrics
+
 
 def batch_size_sweep():
     # batch_sizes = [8, 16, 32, 64, 128]

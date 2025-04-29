@@ -1,7 +1,7 @@
 import time
 import numpy as np
 import torch
-from evaluation.evaluate import evaluate
+from Evaluation.evaluate import evaluate
 
 def train_and_benchmark(model, train_loader, test_loader, optimizer, criterion, device, epochs=2, verbose=True, trainer_fn=None, quantize=False):
     epoch_times = []
