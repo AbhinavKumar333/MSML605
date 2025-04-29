@@ -4,13 +4,13 @@ import torch.optim as optim
 import numpy as np
 import os
 
-from models import convolution_neural_network, resnet, mobilenet
+from Models import convolution_neural_network, resnet, mobilenet
 from data.loader import get_cifar10_loaders
 from training.loop import train
-from evaluation.benchmark import train_and_benchmark, benchmark_quantized
+from Evaluation.benchmark import train_and_benchmark, benchmark_quantized
 
 
-from models import convolution_neural_network, resnet, mobilenet
+from Models import convolution_neural_network, resnet, mobilenet
 
 def train_cpu_model(batch_size=32, epochs=2, learning_rate=0.001, verbose=True, model_variant="vgg16", quantize=False):
     os.environ["OMP_NUM_THREADS"] = str(os.cpu_count())
