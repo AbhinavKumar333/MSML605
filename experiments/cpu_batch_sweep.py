@@ -5,6 +5,7 @@ from Utils.plotting import plot_batchsize_sweep, plot_training_metrics
 
 
 def batch_size_sweep():
+    sweep_results = []
     # batch_sizes = [8, 16, 32, 64, 128]
     batch_sizes = [8, 32]  # Reduced for faster testing
     model_variants = ["vgg16", "resnet18", "mobilenetv2"]
@@ -15,7 +16,7 @@ def batch_size_sweep():
 
     for model_variant in model_variants:
         print(f"\nBenchmarking Model: {model_variant.upper()}\n")
-        
+
         for bs in batch_sizes:
             print(f"Batch Size: {bs}")
 
@@ -33,7 +34,6 @@ def batch_size_sweep():
                 "accuracy": result_normal["accuracy"],
                 "quantized_accuracy": result_quantized["accuracy"]
             })
-
     print_benchmark_table(sweep_results)
 
     for model in model_variants:

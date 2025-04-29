@@ -6,7 +6,6 @@ import os
 
 from Models import convolution_neural_network, resnet, mobilenet
 from data.loader import get_cifar10_loaders
-from Evaluation.evaluate import evaluate
 from training.loop import train
 from Evaluation.benchmark import train_and_benchmark, benchmark_quantized
 
@@ -23,7 +22,11 @@ def train_cpu_model(batch_size=32, epochs=2, learning_rate=0.001, verbose=True, 
         print("MKL Enabled in PyTorch:", torch.backends.mkl.is_available())
 
     # Load CIFAR-10 (TEST)
-    train_loader, test_loader = get_cifar10_loaders(batch_size=batch_size, subset=True)
+    train_loader, test_loader = get_cifar10_loaders(
+        batch_size=32,
+        resize_for_vgg= model_variant.lower() == "vgg16",
+        subset=True
+    )
 
     # === Select model based on variant ===
     if model_variant.lower() == "vgg16":
