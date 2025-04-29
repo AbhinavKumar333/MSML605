@@ -1,8 +1,13 @@
 from features.cpu_optimized import train_cpu_model
 from utils.printing import print_benchmark_table
-from utils.plotting import plot_benchmark_results
+from utils.plotting import plot_benchmark_results, plot_metrics
 
 def batch_size_sweep():
+    # batch_sizes = [8, 16, 32, 64, 128]
+    batch_sizes = [8, 32]  # Reduced for faster testing
+    model_variants = ["vgg16", "resnet18", "mobilenetv2"]
+
+    sweep_results = []
     # batch_sizes = [8, 16, 32, 64, 128]
     batch_sizes = [8, 32]  # Reduced for faster testing
     model_variants = ["vgg16", "resnet18", "mobilenetv2"]
@@ -32,6 +37,15 @@ def batch_size_sweep():
                 "quantized_accuracy": result_quantized["accuracy"]
             })
 
+    print_benchmark_table(sweep_results)
+
+    for model in model_variants:
+        model_data = [r for r in sweep_results if r["model_variant"] == model]
+        epoch_times = [r["avg_epoch_time"] for r in model_data]
+        val_accs = [r["accuracy"] for r in model_data]
+        quant_accs = [r["quantized_accuracy"] for r in model_data]
+
+        plot_metrics(epoch_times, val_accs, quant_accs, title=model.upper())
     print_benchmark_table(sweep_results)
 
     for model in model_variants:
