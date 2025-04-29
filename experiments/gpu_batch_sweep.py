@@ -12,7 +12,7 @@ def batch_size_sweep_gpu():
         for batch_size in batch_sizes:
             result = train_gpu_model(
                 batch_size=batch_size, model_variant=model_variant,
-                epochs=2, learning_rate=0.001, verbose=True, subset=True
+                epochs=10, learning_rate=0.001, verbose=True, subset=True
             )
             result["model"] = model_variant
             result["batch_size"] = batch_size  
