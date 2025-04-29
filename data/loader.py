@@ -12,8 +12,8 @@ def get_cifar10_loaders(batch_size, data_dir="./data", normalize=True, subset=Fa
     test_set = datasets.CIFAR10(data_dir, train=False, download=True, transform=transform)
 
     if subset:
-        train_set = Subset(train_set, range(5))  # Use only 5k images
-        test_set = Subset(test_set, range(1))    # Use only 1k images
+        train_set = Subset(train_set, range(5000))  # Use only 5k images
+        test_set = Subset(test_set, range(1000))    # Use only 1k images
 
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_set, batch_size=batch_size)
