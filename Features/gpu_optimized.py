@@ -4,9 +4,9 @@ import torch.nn as nn
 import torch.optim as optim
 from Models.simplecnn import SimpleCNN
 from Models.vgg import VGG16Modified
-from Data.loader import get_cifar10_loaders
+from data.loader import get_cifar10_loaders
 from Evaluation.evaluate import evaluate
-from Training.loop import train
+from training.loop import train
 from Models.resnet import ResNet18Modified
 from Models.mobilenet import MobileNetV2Modified
 import numpy as np

@@ -1,9 +1,9 @@
 
 import argparse
-from Experiments.cpu_batch_sweep import batch_size_sweep
-from Experiments.optuna_tuning import run_optuna_tuning
-from Experiments.gpu_batch_sweep import batch_size_sweep_gpu
-from Experiments.gpu_optuna_tuning import run_gpu_optuna_tuning
+from experiments.cpu_batch_sweep import batch_size_sweep
+from experiments.optuna_tuning import run_optuna_tuning
+from experiments.gpu_batch_sweep import batch_size_sweep_gpu
+from experiments.gpu_optuna_tuning import run_gpu_optuna_tuning
 from Features.cpu_optimized import train_cpu_model
 from Features.gpu_optimized import train_gpu_model
 

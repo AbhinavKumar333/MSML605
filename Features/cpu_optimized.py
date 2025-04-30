@@ -4,8 +4,8 @@ import torch.nn as nn
 import torch.optim as optim
 import numpy as np
 import os
-from Data.loader import get_cifar10_loaders
-from Training.loop import train
+from data.loader import get_cifar10_loaders
+from training.loop import train
 from Evaluation.benchmark import train_and_benchmark, benchmark_quantized
 from Models import simplecnn, vgg, resnet, mobilenet
 
