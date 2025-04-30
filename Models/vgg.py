@@ -3,9 +3,12 @@ import torch.nn as nn
 from torchvision import models
 from torchvision.models import VGG16_Weights
 
+
 class VGG16Modified(nn.Module):
-    def __init__(self, num_classes=10, input_channels=3, pretrained=True):
+    def __init__(self, num_classes=10, input_channels=3, pretrained=False):
         super(VGG16Modified, self).__init__()
+
+        print("Pretrained = {}".format(pretrained))
 
         # Load pretrained VGG-16 model with weights
         weights = VGG16_Weights.DEFAULT if pretrained else None

@@ -8,9 +8,9 @@ import torch.nn as nn
 
 
 class ResNet18Modified(nn.Module):
-    def __init__(self, num_classes=10, input_channels=3):
+    def __init__(self, num_classes=10, input_channels=3, pretrained=False):
         super(ResNet18Modified, self).__init__()
-        self.model = models.resnet18(pretrained=False)
+        self.model = models.resnet18(pretrained=pretrained)
 
         # If input channels are not 3 (e.g., grayscale images)
         if input_channels != 3:

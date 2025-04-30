@@ -1,5 +1,6 @@
 import time
 
+
 def train(model, train_loader, optimizer, criterion, device="cpu"):
     model.train()
     start_time = time.time()

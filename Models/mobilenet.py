@@ -8,9 +8,9 @@ import torch.nn as nn
 
 
 class MobileNetV2Modified(nn.Module):
-    def __init__(self, num_classes=10, input_channels=3):
+    def __init__(self, num_classes=10, input_channels=3, pretrained=False):
         super(MobileNetV2Modified, self).__init__()
-        self.model = models.mobilenet_v2(pretrained=False)
+        self.model = models.mobilenet_v2(pretrained=pretrained)
 
         # Modify the first conv layer if input_channels != 3
         if input_channels != 3:

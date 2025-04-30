@@ -2,6 +2,7 @@ import optuna
 from Utils.plotting import plot_comparison
 from Features.cpu_optimized import train_cpu_model
 
+
 def objective(trial):
     batch_size = trial.suggest_categorical('batch_size', [8, 16, 32, 64, 128])
     learning_rate = trial.suggest_loguniform('learning_rate', 1e-4, 1e-1)
@@ -17,6 +18,7 @@ def objective(trial):
     )
 
     return result["accuracy"]
+
 
 def run_optuna_tuning():
     study = optuna.create_study(direction="maximize")
@@ -54,5 +56,7 @@ def run_optuna_tuning():
     # === Plot Comparison
     plot_comparison(default_result, tuned_result)
 
+
 if __name__ == "__main__":
     run_optuna_tuning()
+

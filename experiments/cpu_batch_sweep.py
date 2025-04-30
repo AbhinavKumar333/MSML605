@@ -1,18 +1,17 @@
 from Features.cpu_optimized import train_cpu_model
 from Utils.printing import print_benchmark_table
-# from Utils.plotting import plot_benchmark_results, plot_metrics
-from Utils.plotting import plot_batchsize_sweep, plot_training_metrics
+from Utils.plotting import plot_metrics
 
 
-def batch_size_sweep():
+def batch_size_sweep(epochs=2, lr=0.0005):
     sweep_results = []
-    # batch_sizes = [8, 16, 32, 64, 128]
-    batch_sizes = [8, 32]  # Reduced for faster testing
+    batch_sizes = [8, 16, 32, 64, 128]
+    # batch_sizes = [8, 32]  # Reduced for faster testing
     model_variants = ["vgg16", "resnet18", "mobilenetv2"]
 
     sweep_results = []
 
-    print("📊 Starting CPU batch size sweep across models...\n")
+    print("Starting CPU batch size sweep across models...\n")
 
     for model_variant in model_variants:
         print(f"\nBenchmarking Model: {model_variant.upper()}\n")
@@ -21,10 +20,10 @@ def batch_size_sweep():
             print(f"Batch Size: {bs}")
 
             # Normal training
-            result_normal = train_cpu_model(batch_size=bs, verbose=False, model_variant=model_variant, quantize=False)
+            result_normal = train_cpu_model(batch_size=bs, epochs=epochs, learning_rate=lr, model_variant=model_variant, quantize=False)
 
             # Quantized evaluation
-            result_quantized = train_cpu_model(batch_size=bs, verbose=False, model_variant=model_variant, quantize=True)
+            result_quantized = train_cpu_model(batch_size=bs, epochs=epochs, learning_rate=lr, model_variant=model_variant, quantize=True)
 
             # Record
             sweep_results.append({

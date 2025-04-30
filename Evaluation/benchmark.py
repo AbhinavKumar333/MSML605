@@ -2,7 +2,7 @@ import time
 import numpy as np
 import torch
 import tracemalloc
-from evaluation.evaluate import evaluate
+from Evaluation.evaluate import evaluate
 
 def train_and_benchmark(
     model,

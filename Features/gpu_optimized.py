@@ -1,19 +1,18 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from Models.convolution_neural_network import VGG16Modified
-from data.loader import get_cifar10_loaders
+from Models.simplecnn import SimpleCNN
+from Models.vgg import VGG16Modified
+from Data.loader import get_cifar10_loaders
 from Evaluation.evaluate import evaluate
 from Utils.plotting import plot_metrics
-from training.loop import train
-from config.defaults import config
-# from Models.convolution_neural_network import VGG16Modified
+from Training.loop import train
 from Models.resnet import ResNet18Modified
 from Models.mobilenet import MobileNetV2Modified
-
 import numpy as np
 import os
 from memory_profiler import memory_usage
+
 
 # def train_gpu_model(batch_size=64, model_variant="vgg16", epochs=10, learning_rate=0.001, verbose=False, subset=False):
 #     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -45,15 +44,17 @@ from memory_profiler import memory_usage
 #     plot_metrics(epoch_times, val_accuracies)
 
 
-def train_gpu_model(batch_size=64, model_variant="vgg16", epochs=10, learning_rate=0.001, verbose=False, subset=False):
+def train_gpu_model(subset=False, dataset_size=5000, batch_size=64, model_variant="vgg16", epochs=10, learning_rate=0.001, verbose=False):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Running on {device.upper()}")
 
     # Use batch_size and subset passed into the function
     train_loader, test_loader = get_cifar10_loaders(
         batch_size=batch_size,
-        data_dir=config["data_dir"],  # data_dir can still come from config
-        subset=subset
+        data_dir='./Data',
+        resize_for_vgg= model_variant.lower() == "vgg16",
+        subset=subset,
+        dataset_size=dataset_size
     )
 
     # Dynamically select model based on model_variant
@@ -90,11 +91,10 @@ def train_gpu_model(batch_size=64, model_variant="vgg16", epochs=10, learning_ra
     }
 
 
-
-
-
 def build_model(model_variant):
-    if model_variant == "vgg16":
+    if model_variant == "simplecnn":
+        return SimpleCNN(num_classes=10, input_channels=3)
+    elif model_variant == "vgg16":
         return VGG16Modified(num_classes=10, input_channels=3)
     elif model_variant == "resnet18":
         return ResNet18Modified(num_classes=10, input_channels=3)

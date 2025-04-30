@@ -2,8 +2,10 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader, Subset
 import torch
 
-def get_cifar10_loaders(batch_size, data_dir="./data", normalize=True, subset=False, resize_for_vgg=False):
+def get_cifar10_loaders(batch_size, subset, dataset_size, data_dir="./Data", normalize=True, resize_for_vgg=False):
     transform_list = []
+
+    print("Dataset size - {}".format(dataset_size))
 
     # Resize if model expects 224x224 inputs (like VGG16)
     if resize_for_vgg:
@@ -29,8 +31,8 @@ def get_cifar10_loaders(batch_size, data_dir="./data", normalize=True, subset=Fa
 
     # Optionally take subset for faster experiments
     if subset:
-        train_set = Subset(train_set, range(5000))  # first 5,000 images
-        test_set = Subset(test_set, range(1000))    # first 1,000 images
+        train_set = Subset(train_set, range(dataset_size))  # first 5,000 images
+        # test_set = Subset(test_set, range(subest_size))    # first 1,000 images
 
     # Create loaders
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=2, pin_memory=True)
