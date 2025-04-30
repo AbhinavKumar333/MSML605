@@ -1,3 +1,4 @@
+
 from Features.cpu_optimized import train_cpu_model
 from Utils.printing import print_benchmark_table
 from Utils.plotting import plot_metrics
@@ -19,19 +20,19 @@ def batch_size_sweep(epochs=2, lr=0.0005):
         for bs in batch_sizes:
             print(f"Batch Size: {bs}")
 
-            # Normal training
-            result_normal = train_cpu_model(batch_size=bs, epochs=epochs, learning_rate=lr, model_variant=model_variant, quantize=False)
+            # # Normal training
+            # result = train_cpu_model(batch_size=bs, epochs=epochs, learning_rate=lr, model_variant=model_variant, quantize=False)
 
             # Quantized evaluation
-            result_quantized = train_cpu_model(batch_size=bs, epochs=epochs, learning_rate=lr, model_variant=model_variant, quantize=True)
+            result = train_cpu_model(batch_size=bs, epochs=epochs, learning_rate=lr, model_variant=model_variant, quantize=True)
 
             # Record
             sweep_results.append({
                 "model_variant": model_variant,
                 "batch_size": bs,
-                "avg_epoch_time": result_normal["avg_epoch_time"],
-                "accuracy": result_normal["accuracy"],
-                "quantized_accuracy": result_quantized["accuracy"]
+                "avg_epoch_time": result["avg_epoch_time"],
+                "accuracy": result["accuracy"],
+                "quantized_accuracy": result["accuracy"]
             })
     print_benchmark_table(sweep_results)
 

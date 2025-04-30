@@ -1,6 +1,6 @@
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader, Subset
-import torch
+
 
 def get_cifar10_loaders(batch_size, subset, dataset_size, data_dir="./Data", normalize=True, resize_for_vgg=False):
     transform_list = []

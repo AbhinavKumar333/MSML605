@@ -10,11 +10,8 @@ def objective(trial):
 
     result = train_gpu_model(
         batch_size=batch_size,
-        epochs=2,
         learning_rate=learning_rate,
         model_variant=model_variant,
-        verbose=False,
-        subset=True,  # Use small subset to speed up tuning
         quantize=False,
         amp=True,     # Use Automatic Mixed Precision
     )
