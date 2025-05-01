@@ -11,7 +11,9 @@
 
 module load python/3.10.10
 
-source /home/ak395/scratch.msml605/MSML605/env/bin/activate
+source /home/ak395/scratch.msml605/MSML605/cpu_venv/bin/activate
+
+pip install -r cpu_requirements.txt
 
 cd /home/ak395/scratch.msml605/MSML605
 

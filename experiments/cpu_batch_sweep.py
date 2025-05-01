@@ -8,7 +8,7 @@ def batch_size_sweep(epochs=2, lr=0.0005):
     sweep_results = []
     batch_sizes = [8, 16, 32, 64, 128]
     # batch_sizes = [8, 32]  # Reduced for faster testing
-    model_variants = ["vgg16", "resnet18", "mobilenetv2"]
+    model_variants = ["resnet18", "mobilenetv2"]
 
     sweep_results = []
 

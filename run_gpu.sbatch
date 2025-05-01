@@ -13,7 +13,9 @@
 module load cuda/12.3.0
 module load python/3.10.10
 
-source /home/ak395/scratch.msml605/MSML605/env/bin/activate
+source /home/ak395/scratch.msml605/MSML605/gpu_venv/bin/activate
+
+pip install -r gpu_requirements.txt
 
 cd /home/ak395/scratch.msml605/MSML605
 

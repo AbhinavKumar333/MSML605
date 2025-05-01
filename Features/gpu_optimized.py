@@ -29,7 +29,7 @@ def build_model(model_variant, model_args):
         raise ValueError(f"Unknown model variant: {model_variant}")
 
 
-def train_gpu_model(subset=False, dataset_size=5000, batch_size=64, model_variant="vgg16", epochs=10, learning_rate=0.001, verbose=False):
+def train_gpu_model(subset=False, dataset_size=5000, batch_size=64, model_variant="vgg16", epochs=10, learning_rate=0.001, verbose=True):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Running on {device.upper()}")
 
