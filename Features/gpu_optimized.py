@@ -1,4 +1,5 @@
 
+import tracemalloc
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -55,6 +56,9 @@ def train_gpu_model(subset=False, dataset_size=5000, batch_size=64, model_varian
     epoch_times = []
     val_accuracies = []
 
+    tracemalloc.start()
+    max_memory = 0
+
     for epoch in range(epochs):
         loss, duration = train(model, train_loader, optimizer, criterion, device=device)
         epoch_times.append(duration)
@@ -64,6 +68,8 @@ def train_gpu_model(subset=False, dataset_size=5000, batch_size=64, model_varian
 
         acc = evaluate(model, test_loader, device=device)
         val_accuracies.append(acc)
+        current, peak = tracemalloc.get_traced_memory()
+        max_memory = max(max_memory, peak / (1024 * 1024))  # MB
     
     # Quantization Benchmark
     # if quantize:
@@ -83,7 +89,8 @@ def train_gpu_model(subset=False, dataset_size=5000, batch_size=64, model_varian
     return {
         "batch_size": batch_size,
         "avg_epoch_time": np.mean(epoch_times),
-        "accuracy": val_accuracies[-1]
+        "accuracy": val_accuracies[-1],
+        "peak_memory_usage": max_memory
     }
 
 

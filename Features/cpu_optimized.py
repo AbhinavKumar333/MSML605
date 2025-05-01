@@ -79,7 +79,9 @@ def train_cpu_model(subset=False, dataset_size=5000, batch_size=32, epochs=2, le
         "batch_size": batch_size,
         "avg_epoch_time": stats["avg_epoch_time"],
         "accuracy": stats["final_acc"],
-        "quantized_accuracy": acc_quant
+        "quantized_accuracy": acc_quant,
+        "peak_memory_usage": stats['peak_memory_MB'],
+        "inference_latency": stats['inference_latency']
     }
 
 
