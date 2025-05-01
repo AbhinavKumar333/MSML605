@@ -28,7 +28,7 @@ def build_model(model_variant, model_args):
         raise ValueError(f"Unknown model variant: {model_variant}")
 
 
-def train_gpu_model(subset=False, dataset_size=5000, batch_size=64, model_variant="vgg16", epochs=10, learning_rate=0.001, verbose=False, quantize=False):
+def train_gpu_model(subset=False, dataset_size=5000, batch_size=64, model_variant="vgg16", epochs=10, learning_rate=0.001, verbose=False):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Running on {device.upper()}")
 
@@ -66,12 +66,12 @@ def train_gpu_model(subset=False, dataset_size=5000, batch_size=64, model_varian
         val_accuracies.append(acc)
     
     # Quantization Benchmark
-    if quantize:
-        acc_quant = benchmark_quantized(model, test_loader, device=device)
-        if verbose:
-            print(f"Quantized Accuracy: {acc_quant:.2f}%")
-    else:
-        acc_quant = None
+    # if quantize:
+    #     acc_quant = benchmark_quantized(model, test_loader, device=device)
+    #     if verbose:
+    #         print(f"Quantized Accuracy: {acc_quant:.2f}%")
+    # else:
+    #     acc_quant = None
 
     # Optionally print final results
     if verbose:
@@ -83,8 +83,7 @@ def train_gpu_model(subset=False, dataset_size=5000, batch_size=64, model_varian
     return {
         "batch_size": batch_size,
         "avg_epoch_time": np.mean(epoch_times),
-        "accuracy": val_accuracies[-1],
-        "quantized_accuracy": acc_quant
+        "accuracy": val_accuracies[-1]
     }
 
 

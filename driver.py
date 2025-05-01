@@ -51,8 +51,7 @@ def main():
             epochs=args.epochs,
             learning_rate=args.learning_rate,
             model_variant=args.model,
-            verbose=True,
-            quantize=True
+            verbose=True
         )
 
         print("\nSingle Run Result:")
