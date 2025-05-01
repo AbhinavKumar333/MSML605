@@ -5,7 +5,8 @@ from torch.utils.data import DataLoader, Subset
 def get_cifar10_loaders(batch_size, subset, dataset_size, data_dir="./data", normalize=True, resize_for_vgg=False):
     transform_list = []
 
-    print("Dataset size - {}".format(dataset_size))
+    if subset:
+        print("Dataset size - {}".format(dataset_size))
 
     # Resize if model expects 224x224 inputs (like VGG16)
     if resize_for_vgg:
