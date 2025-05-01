@@ -35,7 +35,7 @@ def train_gpu_model(subset=False, dataset_size=5000, batch_size=64, model_varian
     # Use batch_size and subset passed into the function
     train_loader, test_loader = get_cifar10_loaders(
         batch_size=batch_size,
-        data_dir='./Data',
+        data_dir='./data',
         resize_for_vgg= model_variant.lower() == "vgg16",
         subset=subset,
         dataset_size=dataset_size
