@@ -20,3 +20,5 @@ def batch_size_sweep_gpu():
             results.append(result)
 
     plot_batchsize_sweep(results, title="GPU Optimization Sweep")
+
+    return result

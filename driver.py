@@ -6,6 +6,7 @@ from experiments.gpu_batch_sweep import batch_size_sweep_gpu
 from experiments.gpu_optuna_tuning import run_gpu_optuna_tuning
 from Features.cpu_optimized import train_cpu_model
 from Features.gpu_optimized import train_gpu_model
+from Utils.caching_results import save_results
 
 
 RUN_MODULES = {
@@ -56,10 +57,12 @@ def main():
 
         print("\nSingle Run Result:")
         print(result)
+        save_results(args.hardware, result)
     
     else:
         
-        module()
+        result = module()
+        save_results(args.hardware, result)
 
 
 if __name__ == "__main__":

@@ -1,4 +1,3 @@
-# run_cpu.sbatch
 #!/bin/bash
 #SBATCH --job-name=cpu_job             # job name
 #SBATCH --output=logs/%x-%j.out        # stdout (%x=job-name, %j=job-id)
@@ -17,3 +16,5 @@ source /home/ak395/scratch.msml605/MSML605/env/bin/activate
 cd /home/ak395/scratch.msml605/MSML605
 
 python driver.py --hardware CPU --mode single --model simplecnn --subset True --dataset_size 50 --batch_size 32 --learning_rate 0.0005
+
+deactivate

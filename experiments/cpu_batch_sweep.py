@@ -44,6 +44,7 @@ def batch_size_sweep(epochs=2, lr=0.0005):
 
         plot_metrics(epoch_times, val_accs, quant_accs, title=model.upper())
 
+    return sweep_results
 
 if __name__ == "__main__":
     batch_size_sweep()
