@@ -4,7 +4,7 @@ from Utils.printing import print_benchmark_table
 from Utils.plotting import plot_metrics
 
 
-def batch_size_sweep(epochs=2, lr=0.0005):
+def batch_size_sweep(subset=False, dataset_size=5000, epochs=2, lr=0.0005):
     sweep_results = []
     batch_sizes = [8, 16, 32, 64, 128]
     # batch_sizes = [8, 32]  # Reduced for faster testing
@@ -24,7 +24,7 @@ def batch_size_sweep(epochs=2, lr=0.0005):
             # result = train_cpu_model(batch_size=bs, epochs=epochs, learning_rate=lr, model_variant=model_variant, quantize=False)
 
             # Quantized evaluation
-            result = train_cpu_model(batch_size=bs, epochs=epochs, learning_rate=lr, model_variant=model_variant, quantize=True)
+            result = train_cpu_model(subset=subset, dataset_size=dataset_size, batch_size=bs, epochs=epochs, learning_rate=lr, model_variant=model_variant, quantize=True, verbose=True)
 
             # Record
             sweep_results.append({
