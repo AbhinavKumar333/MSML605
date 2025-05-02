@@ -17,6 +17,6 @@ pip install -r cpu_requirements.txt
 
 cd /home/ak395/scratch.msml605/MSML605
 
-python driver.py --hardware CPU --mode single --model resnet18 --subset True --dataset_size 5000 --batch_size 128 --learning_rate 0.0005
+python driver.py --hardware CPU --mode single --model resnet18 --subset True --dataset_size 5000 --batch_size 128 --learning_rate 0.0005 --epochs 10
 
 deactivate
