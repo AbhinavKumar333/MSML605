@@ -13,8 +13,6 @@ module load python/3.10.10
 
 source /home/ak395/scratch.msml605/MSML605/cpu_venv/bin/activate
 
-pip install -r cpu_requirements.txt
-
 cd /home/ak395/scratch.msml605/MSML605
 
 python driver.py --hardware CPU --mode sweep --model resnet18 --subset True --dataset_size 5000 --epochs 10 --learning_rate 0.0005
