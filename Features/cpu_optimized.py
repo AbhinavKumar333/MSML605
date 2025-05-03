@@ -15,6 +15,7 @@ def train_cpu_model(subset=False, dataset_size=5000, batch_size=32, epochs=2, le
     torch.set_num_threads(os.cpu_count())
 
     if verbose:
+        print(f"\n[Model Variant: {model_variant}]")
         print(f"\n[Batch Size: {batch_size}]")
         print(f"Running on CPU with {torch.get_num_threads()} threads")
         print("MKL Enabled in PyTorch:", torch.backends.mkl.is_available())

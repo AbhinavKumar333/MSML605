@@ -31,7 +31,9 @@ def build_model(model_variant, model_args):
 
 def train_gpu_model(subset=False, dataset_size=5000, batch_size=64, model_variant="vgg16", epochs=10, learning_rate=0.001, verbose=True):
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    print(f"Running on {device.upper()}")
+    print(f"\nRunning on {device.upper()}")
+    print(f"\n[Model Variant: {model_variant}]")
+    print(f"\n[Batch Size: {batch_size}]")
 
     # Use batch_size and subset passed into the function
     train_loader, test_loader = get_cifar10_loaders(
