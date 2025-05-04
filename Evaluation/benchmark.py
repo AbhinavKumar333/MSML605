@@ -1,7 +1,8 @@
+import psutil
+import os
 import time
 import numpy as np
 import torch
-import tracemalloc
 from Evaluation.evaluate import evaluate
 
 def train_and_benchmark(
@@ -18,9 +19,14 @@ def train_and_benchmark(
 ):
     epoch_times = []
     val_accuracies = []
-    max_memory = 0
 
-    tracemalloc.start()
+    # Initialize memory trackers
+    if device == "cpu":
+        process = psutil.Process(os.getpid())
+        peak_memory_MB = 0
+    else:  # GPU
+        torch.cuda.reset_peak_memory_stats()
+        peak_memory_MB = 0
 
     for epoch in range(epochs):
         start = time.perf_counter()
@@ -31,8 +37,13 @@ def train_and_benchmark(
         acc = evaluate(model, test_loader, device=device)
         val_accuracies.append(acc)
 
-        current, peak = tracemalloc.get_traced_memory()
-        max_memory = max(max_memory, peak / (1024 * 1024))  # MB
+        # Track peak memory based on device
+        if device == "cpu":
+            mem_info = process.memory_info().rss  # in bytes
+            peak_memory_MB = max(peak_memory_MB, mem_info / (1024 ** 2))  # in MB
+        else:
+            peak = torch.cuda.max_memory_allocated(device=device)
+            peak_memory_MB = max(peak_memory_MB, peak / (1024 ** 2))  # in MB
 
         if verbose:
             print(f"Epoch {epoch + 1}/{epochs} - Time: {duration:.2f}s - Acc: {acc:.2f}%")
@@ -43,7 +54,6 @@ def train_and_benchmark(
             print("Applying dynamic quantization for final evaluation...")
         final_model = torch.quantization.quantize_dynamic(model, {torch.nn.Linear}, dtype=torch.qint8)
 
-    # Final accuracy (with or without quantization)
     final_acc = evaluate(final_model, test_loader, device=device)
 
     # Measure inference latency
@@ -51,15 +61,13 @@ def train_and_benchmark(
     _ = evaluate(final_model, test_loader, device=device)
     inference_latency = time.perf_counter() - start_inf
 
-    tracemalloc.stop()
-
     return {
         "epoch_times": epoch_times,
         "val_accuracies": val_accuracies,
         "final_acc": final_acc,
         "avg_epoch_time": np.mean(epoch_times),
         "inference_latency": inference_latency,
-        "peak_memory_MB": max_memory
+        "peak_memory_MB": peak_memory_MB
     }
 
 

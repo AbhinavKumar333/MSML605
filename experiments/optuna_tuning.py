@@ -1,5 +1,5 @@
 import optuna
-from Utils.plotting import plot_comparison
+from Utils.plotting import plot_default_vs_tuned_comparison as plot_comparison
 from Features.cpu_optimized import train_cpu_model
 
 

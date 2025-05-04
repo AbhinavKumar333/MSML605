@@ -1,5 +1,6 @@
 
 import argparse
+import torch
 from experiments.cpu_batch_sweep import batch_size_sweep
 from experiments.optuna_tuning import run_optuna_tuning
 from experiments.gpu_batch_sweep import batch_size_sweep_gpu
@@ -41,6 +42,9 @@ def main():
     
     module = RUN_MODULES[args.hardware.upper()].get(args.mode)
     print("\nRunning {} on {}".format(args.mode, args.hardware))
+    print("CUDA available:", torch.cuda.is_available())
+    if torch.cuda.is_available():
+        print("GPU Name:", torch.cuda.get_device_name(0))
 
     if args.mode == 'single':
         

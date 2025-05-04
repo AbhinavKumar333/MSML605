@@ -13,6 +13,7 @@ from Models import simplecnn, vgg, resnet, mobilenet
 def train_cpu_model(subset=False, dataset_size=5000, batch_size=32, epochs=2, learning_rate=0.0005, verbose=True, model_variant="vgg16", quantize=False):
     os.environ["OMP_NUM_THREADS"] = str(os.cpu_count())
     torch.set_num_threads(os.cpu_count())
+    torch.backends.mkldnn.enabled = True
 
     if verbose:
         print(f"\n[Batch Size: {batch_size}]")

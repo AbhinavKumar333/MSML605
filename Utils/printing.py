@@ -3,18 +3,26 @@ import matplotlib.pyplot as plt
 # printing.py - enhanced to complement plotting.py
 
 def print_benchmark_table(results):
-    print("{:<12} {:<18} {:<18} {:<18} {:<18}".format(
-        "Batch Size", "Epoch Time (s)", "Accuracy (%)", "Quantized Acc (%)", "Peak Memory (MB)"
-    ))
-    print("-" * 85)
+    from collections import defaultdict
+
+    grouped = defaultdict(list)
     for r in results:
-        print("{:<12} {:<18.2f} {:<18.2f} {:<18} {:<18}".format(
-            r['batch_size'],
-            r['avg_epoch_time'],
-            r['accuracy'],
-            f"{r['quantized_accuracy']:.2f}" if r.get('quantized_accuracy') else "N/A",
-            f"{r['peak_memory_MB']:.2f}" if r.get('peak_memory_MB') else "N/A"
+        grouped[r["model_variant"]].append(r)
+
+    for model_variant, model_results in grouped.items():
+        print(f"\n=== Benchmark: {model_variant.upper()} ===")
+        print("{:<12} {:<18} {:<18} {:<18} {:<18}".format(
+            "Batch Size", "Epoch Time (s)", "Accuracy (%)", "Quantized Acc (%)", "Peak Memory (MB)"
         ))
+        print("-" * 85)
+        for r in model_results:
+            print("{:<12} {:<18.2f} {:<18.2f} {:<18} {:<18}".format(
+                r['batch_size'],
+                r['avg_epoch_time'],
+                r['accuracy'],
+                f"{r['quantized_accuracy']:.2f}" if r.get('quantized_accuracy') else "N/A",
+                f"{r['peak_memory_MB']:.2f}" if r.get('peak_memory_MB') else "N/A"
+            ))
 
 def print_single_result(result):
     print("\n🔎 Final Result Summary:")
