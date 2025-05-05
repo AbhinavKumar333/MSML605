@@ -31,45 +31,35 @@ def plot_metrics(epoch_times, val_accuracies, quantized_accuracies=None, title="
 # ========================================
 # Plot: Default vs Tuned Comparison
 # ========================================
-def plot_all_comparisons(comparisons):
-    import matplotlib.pyplot as plt
-
+def plot_full_comparisons(comparisons):
     metrics = {
-        "Accuracy (%)": ("accuracy", "%", 0, 100),
-        "Avg Epoch Time (s)": ("avg_epoch_time", "s", None, None),
-        "Inference Latency (s)": ("inference_latency", "s", None, None),
-        "Peak Memory Usage (MB)": ("peak_memory_MB", "MB", None, None),
+        "Accuracy (%)": ("accuracy", "%"),
+        "Avg Epoch Time (s)": ("avg_epoch_time", "s"),
+        "Inference Latency (s)": ("inference_latency", "s"),
+        "Peak Memory Usage (MB)": ("peak_memory_MB", "MB")
     }
 
     for model_name, runs in comparisons:
-        cols = 2
-        rows = (len(metrics) + 1) // 2
-        fig, axs = plt.subplots(rows, cols, figsize=(12, 5 * rows))
-        axs = axs.flatten()
+        strategies = [label for label, _ in runs]
 
-        for idx, (title, (key, unit, _, _)) in enumerate(metrics.items()):
-            labels = []
-            values = []
+        for metric_title, (key, unit) in metrics.items():
+            values = [result.get(key, 0) for _, result in runs]
 
-            for label, result in runs:
-                value = result.get(key)
-                if value is not None:
-                    labels.append(label)
-                    values.append(value)
+            plt.figure(figsize=(10, 5))
+            bars = plt.bar(strategies, values, color='skyblue')
+            plt.title(f"{metric_title} for {model_name}")
+            plt.ylabel(f"{metric_title} ({unit})")
+            plt.xticks(rotation=30, ha='right')
 
-            if labels:
-                axs[idx].bar(labels, values, color='skyblue')
-                axs[idx].set_title(title)
-                axs[idx].set_ylabel(unit)
-                axs[idx].tick_params(axis='x', rotation=20)
+            # Annotate bars
+            for bar, val in zip(bars, values):
+                plt.text(bar.get_x() + bar.get_width() / 2, bar.get_height(),
+                         f"{val:.2f}", ha='center', va='bottom', fontsize=9)
 
-        for j in range(len(metrics), len(axs)):
-            fig.delaxes(axs[j])
+            plt.tight_layout()
+            plt.show()
 
-        plt.suptitle(f"Performance Comparison for {model_name}", fontsize=16)
-        plt.tight_layout()
-    plt.show()
-    
+
 # ========================================
 # Plot: Batch Size Sweep Results (Multiple Models)
 # ========================================
