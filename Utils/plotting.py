@@ -31,34 +31,42 @@ def plot_metrics(epoch_times, val_accuracies, quantized_accuracies=None, title="
 # ========================================
 # Plot: Default vs Tuned Comparison
 # ========================================
-def plot_default_vs_tuned_comparison(default_result, tuned_result):
-    models = ["Default", "Tuned"]
-    accuracies = [default_result["accuracy"], tuned_result["accuracy"]]
-    times = [default_result["avg_epoch_time"], tuned_result["avg_epoch_time"]]
-    latency = [default_result.get("inference_latency", 0), tuned_result.get("inference_latency", 0)]
-    memory = [default_result.get("peak_memory_MB", 0), tuned_result.get("peak_memory_MB", 0)]
+def plot_all_comparisons(comparisons):
+    import matplotlib.pyplot as plt
 
-    fig, axs = plt.subplots(2, 2, figsize=(12, 10))
+    metrics = {
+        "Accuracy (%)": ("accuracy", "%", 0, 100),
+        "Avg Epoch Time (s)": ("avg_epoch_time", "s", None, None),
+        "Inference Latency (s)": ("inference_latency", "s", None, None),
+        "Peak Memory Usage (MB)": ("peak_memory_MB", "MB", None, None),
+    }
 
-    axs[0, 0].bar(models, accuracies, color=['blue', 'green'])
-    axs[0, 0].set_title("Final Validation Accuracy (%)")
-    axs[0, 0].set_ylim(0, 100)
-    axs[0, 0].grid(True)
+    for model_name, default_result, tuned_result in comparisons:
+        valid_metrics = []
+        for title, (key, unit, _, _) in metrics.items():
+            d_val = default_result.get(key, 0)
+            t_val = tuned_result.get(key, 0)
+            if d_val != 0 or t_val != 0:
+                valid_metrics.append((title, key, unit))
 
-    axs[0, 1].bar(models, times, color=['blue', 'green'])
-    axs[0, 1].set_title("Average Epoch Time (s)")
-    axs[0, 1].grid(True)
+        cols = 2
+        rows = (len(valid_metrics) + 1) // 2
+        fig, axs = plt.subplots(rows, cols, figsize=(12, 5 * rows))
+        axs = axs.flatten()
 
-    axs[1, 0].bar(models, latency, color=['blue', 'green'])
-    axs[1, 0].set_title("Inference Latency (s)")
-    axs[1, 0].grid(True)
+        for idx, (title, key, unit) in enumerate(valid_metrics):
+            d_val = default_result.get(key, 0)
+            t_val = tuned_result.get(key, 0)
+            axs[idx].bar(["Default", "Tuned"], [d_val, t_val], color=["blue", "green"])
+            axs[idx].set_title(title)
+            axs[idx].set_ylabel(unit)
 
-    axs[1, 1].bar(models, memory, color=['blue', 'green'])
-    axs[1, 1].set_title("Peak Memory Usage (MB)")
-    axs[1, 1].grid(True)
+        for j in range(len(valid_metrics), len(axs)):
+            fig.delaxes(axs[j])
 
-    plt.suptitle("Performance Comparison: Default vs Tuned", fontsize=16)
-    plt.tight_layout()
+        plt.suptitle(f"Performance Comparison for {model_name}", fontsize=16)
+        plt.tight_layout()
+
     plt.show()
 
 # ========================================

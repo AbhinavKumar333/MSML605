@@ -1,62 +1,78 @@
 import optuna
-from Utils.plotting import plot_default_vs_tuned_comparison as plot_comparison
+import torch
+from Utils.plotting import plot_all_comparisons
 from Features.cpu_optimized import train_cpu_model
 
-
-def objective(trial):
+def objective(trial, model_variant):
     batch_size = trial.suggest_categorical('batch_size', [8, 16, 32, 64, 128])
     learning_rate = trial.suggest_loguniform('learning_rate', 1e-4, 1e-1)
-    model_variant = trial.suggest_categorical('model_variant', ["vgg16", "resnet18", "mobilenetv2"])
 
     result = train_cpu_model(
         batch_size=batch_size,
-        epochs=2,
+        epochs=5,
         learning_rate=learning_rate,
         verbose=False,
         model_variant=model_variant,
-        quantize=False
+        quantize=False,
+        subset=True,
+        dataset_size=5000
     )
-
     return result["accuracy"]
 
-
 def run_optuna_tuning():
-    study = optuna.create_study(direction="maximize")
-    # study.optimize(objective, n_trials=20)
-    study.optimize(objective, n_trials=5)  # Only 5 trials temporarily
+    model_variants = ["resnet18", "mobilenetv2"]
+    all_results = []
+    comparisons = []
 
-    print("\nBest Hyperparameters Found:")
-    for key, value in study.best_params.items():
-        print(f"{key}: {value}")
+    for model_variant in model_variants:
+        print(f"\n=== Tuning {model_variant.upper()} ===")
+        study = optuna.create_study(direction="maximize")
+        study.optimize(lambda trial: objective(trial, model_variant), n_trials=3)
 
-    print(f"\nBest Validation Accuracy: {study.best_value:.2f}%")
+        print("\nBest Hyperparameters Found:")
+        for key, value in study.best_params.items():
+            print(f"{key}: {value}")
 
-    # === Retrain Default Settings
-    print("\nTraining with Default Settings...")
-    default_result = train_cpu_model(
-        batch_size=32,
-        epochs=2,
-        learning_rate=0.001,
-        model_variant="vgg16",
-        verbose=True,
-        quantize=False
-    )
+        print(f"\nBest Validation Accuracy: {study.best_value:.2f}%")
 
-    # === Retrain Best Tuned Settings
-    print("\nTraining with Best Tuned Settings...")
-    tuned_result = train_cpu_model(
-        batch_size=study.best_params['batch_size'],
-        epochs=2,
-        learning_rate=study.best_params['learning_rate'],
-        model_variant=study.best_params['model_variant'],
-        verbose=True,
-        quantize=False
-    )
+        print("\nTraining with Default Settings...")
+        default_result = train_cpu_model(
+            batch_size=32,
+            epochs=5,
+            learning_rate=0.001,
+            model_variant=model_variant,
+            verbose=True,
+            quantize=True,
+            subset=True,
+            dataset_size=5000
+        )
 
-    # === Plot Comparison
-    plot_comparison(default_result, tuned_result)
+        print("\nTraining with Best Tuned Settings...")
+        tuned_result = train_cpu_model(
+            batch_size=study.best_params['batch_size'],
+            epochs=5,
+            learning_rate=study.best_params['learning_rate'],
+            model_variant=model_variant,
+            verbose=True,
+            quantize=True,
+            subset=True,
+            dataset_size=5000
+        )
 
+        # Save metrics in uniform result format
+        all_results.append({
+            "model_variant": model_variant,
+            "batch_size": study.best_params["batch_size"],
+            "learning_rate": study.best_params["learning_rate"],
+            "accuracy": tuned_result["accuracy"],
+            "quantized_accuracy": tuned_result["quantized_accuracy"],
+            "avg_epoch_time": tuned_result["avg_epoch_time"],
+            "inference_latency": tuned_result["inference_latency"],
+            "peak_memory_MB": tuned_result["peak_memory_MB"]
+        })
 
-if __name__ == "__main__":
-    run_optuna_tuning()
+        # Optional plotting
+        comparisons.append((model_variant.upper(), default_result, tuned_result))
 
+    plot_all_comparisons(comparisons)
+    return all_results

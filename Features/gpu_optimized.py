@@ -1,19 +1,13 @@
-
-import tracemalloc
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from Models.simplecnn import SimpleCNN
 from Models.vgg import VGG16Modified
-from data.loader import get_cifar10_loaders
-from Evaluation.evaluate import evaluate
-from training.loop import train
 from Models.resnet import ResNet18Modified
 from Models.mobilenet import MobileNetV2Modified
-import numpy as np
-import os
-from Evaluation.benchmark import benchmark_quantized
-from memory_profiler import memory_usage
+from data.loader import get_cifar10_loaders
+from Evaluation.benchmark import train_and_benchmark
+from training.loop import train
 
 
 def build_model(model_variant, model_args):
@@ -29,72 +23,59 @@ def build_model(model_variant, model_args):
         raise ValueError(f"Unknown model variant: {model_variant}")
 
 
-def train_gpu_model(subset=False, dataset_size=5000, batch_size=64, model_variant="vgg16", epochs=10, learning_rate=0.001, verbose=True):
+def train_gpu_model(
+    subset=False,
+    dataset_size=5000,
+    batch_size=64,
+    model_variant="resnet18",
+    epochs=10,
+    learning_rate=0.001,
+    verbose=True,
+    amp=True,
+    quantize=False
+):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Running on {device.upper()}")
 
-    # Use batch_size and subset passed into the function
+    # Load CIFAR-10 dataset
     train_loader, test_loader = get_cifar10_loaders(
         batch_size=batch_size,
-        data_dir='./data',
-        resize_for_vgg= model_variant.lower() == "vgg16",
+        resize_for_vgg=(model_variant.lower() == "vgg16"),
         subset=subset,
         dataset_size=dataset_size
     )
 
-    # Dynamically select model based on model_variant
     model_args = {
         "num_classes": 10,
         "input_channels": 3,
-        "pretrained": subset == True
+        "pretrained": subset
     }
     model = build_model(model_variant, model_args).to(device)
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
-    epoch_times = []
-    val_accuracies = []
+    # Benchmark training
+    stats = train_and_benchmark(
+        model, train_loader, test_loader,
+        optimizer, criterion, device=device,
+        epochs=epochs, verbose=verbose,
+        trainer_fn=train,
+        quantize=quantize,
+        use_tracemalloc=(device == "cpu"),
+        use_amp=amp
+    )
 
-    tracemalloc.start()
-    max_memory = 0
-
-    for epoch in range(epochs):
-        loss, duration = train(model, train_loader, optimizer, criterion, device=device)
-        epoch_times.append(duration)
-
-        if verbose:
-            print(f"Epoch {epoch+1}/{epochs} - Loss: {loss:.4f} - Time: {duration:.2f}s")
-
-        acc = evaluate(model, test_loader, device=device)
-        val_accuracies.append(acc)
-        current, peak = tracemalloc.get_traced_memory()
-        max_memory = max(max_memory, peak / (1024 * 1024))  # MB
-    
-    # Quantization Benchmark
-    # if quantize:
-    #     acc_quant = benchmark_quantized(model, test_loader, device=device)
-    #     if verbose:
-    #         print(f"Quantized Accuracy: {acc_quant:.2f}%")
-    # else:
-    #     acc_quant = None
-
-    # Optionally print final results
-    if verbose:
-        print("\nTraining complete.")
-        print(f"Avg epoch time: {np.mean(epoch_times):.2f}s")
-        print(f"Final validation accuracy: {val_accuracies[-1]:.2f}%")
-
-    # Return a dictionary of results (no need to plot inside this function)
     return {
         "batch_size": batch_size,
-        "avg_epoch_time": np.mean(epoch_times),
-        "accuracy": val_accuracies[-1],
-        "peak_memory_usage": max_memory
+        "avg_epoch_time": stats["avg_epoch_time"],
+        "accuracy": stats["final_acc"],
+        "quantized_accuracy": None,
+        "peak_memory_MB": stats.get("peak_memory_MB"),
+        "inference_latency": stats["inference_latency"]
     }
 
 
 if __name__ == "__main__":
-    mem = memory_usage((train_gpu_model,), max_iterations=1)
-    print(f"Peak memory usage: {max(mem):.2f} MB")
-
+    result = train_gpu_model()
+    print(result)

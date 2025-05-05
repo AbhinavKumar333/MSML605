@@ -1,4 +1,3 @@
-
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -6,11 +5,20 @@ import numpy as np
 import os
 from data.loader import get_cifar10_loaders
 from training.loop import train
-from Evaluation.benchmark import train_and_benchmark, benchmark_quantized
+from Evaluation.benchmark import train_and_benchmark
 from Models import simplecnn, vgg, resnet, mobilenet
 
 
-def train_cpu_model(subset=False, dataset_size=5000, batch_size=32, epochs=2, learning_rate=0.0005, verbose=True, model_variant="vgg16", quantize=False):
+def train_cpu_model(
+    subset=False,
+    dataset_size=5000,
+    batch_size=32,
+    epochs=2,
+    learning_rate=0.0005,
+    verbose=True,
+    model_variant="resnet18",
+    quantize=False
+):
     os.environ["OMP_NUM_THREADS"] = str(os.cpu_count())
     torch.set_num_threads(os.cpu_count())
     torch.backends.mkldnn.enabled = True
@@ -20,10 +28,10 @@ def train_cpu_model(subset=False, dataset_size=5000, batch_size=32, epochs=2, le
         print(f"Running on CPU with {torch.get_num_threads()} threads")
         print("MKL Enabled in PyTorch:", torch.backends.mkl.is_available())
 
-    # Load CIFAR-10 (TEST)
+    # Load CIFAR-10 dataset
     train_loader, test_loader = get_cifar10_loaders(
         batch_size=batch_size,
-        resize_for_vgg= model_variant.lower() == "vgg16",
+        resize_for_vgg=(model_variant.lower() == "vgg16"),
         subset=subset,
         dataset_size=dataset_size
     )
@@ -31,10 +39,10 @@ def train_cpu_model(subset=False, dataset_size=5000, batch_size=32, epochs=2, le
     model_args = {
         "num_classes": 10,
         "input_channels": 3,
-        "pretrained": subset == True
+        "pretrained": subset
     }
 
-    # === Select model based on variant ===
+    # Select model
     if model_variant.lower() == "simplecnn":
         model = simplecnn.SimpleCNN(**model_args)
     elif model_variant.lower() == "vgg16":
@@ -48,7 +56,7 @@ def train_cpu_model(subset=False, dataset_size=5000, batch_size=32, epochs=2, le
 
     model = model.to("cpu")
 
-    # Optional optimization with torch.compile
+    # # Optional: compile model
     # try:
     #     model = torch.compile(model)
     #     if verbose:
@@ -57,34 +65,31 @@ def train_cpu_model(subset=False, dataset_size=5000, batch_size=32, epochs=2, le
     #     if verbose:
     #         print("torch.compile() not available, using regular model")
 
-    # Loss and Optimizer
+    # Loss and optimizer
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
-    # Training and Benchmarking
+    # Benchmark training
     stats = train_and_benchmark(
-        model, train_loader, test_loader, optimizer, criterion,
-        device="cpu", epochs=epochs, verbose=verbose, trainer_fn=train,
-        quantize=False  # or True if you want quantized final evaluation
+        model, train_loader, test_loader,
+        optimizer, criterion, device="cpu",
+        epochs=epochs, verbose=verbose,
+        trainer_fn=train,
+        quantize=quantize,
+        use_tracemalloc=True,
+        use_amp=False
     )
-
-    # Quantization Benchmark
-    if quantize:
-        acc_quant = benchmark_quantized(model, test_loader, device="cpu")
-        if verbose:
-            print(f"Quantized Accuracy: {acc_quant:.2f}%")
-    else:
-        acc_quant = None
 
     return {
         "batch_size": batch_size,
         "avg_epoch_time": stats["avg_epoch_time"],
         "accuracy": stats["final_acc"],
-        "quantized_accuracy": acc_quant,
-        "peak_memory_usage": stats['peak_memory_MB'],
-        "inference_latency": stats['inference_latency']
+        "quantized_accuracy": stats.get("quantized_acc", None),
+        "peak_memory_MB": stats["peak_memory_MB"],
+        "inference_latency": stats["inference_latency"]
     }
 
 
 if __name__ == "__main__":
-    train_cpu_model()
+    result = train_cpu_model()
+    print(result)

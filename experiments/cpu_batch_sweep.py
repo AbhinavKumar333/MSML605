@@ -30,8 +30,8 @@ def batch_size_sweep(epochs=2, lr=0.001):
                 learning_rate=lr,
                 model_variant=model_variant,
                 quantize=True,
-                subset=False,
-                dataset_size=50000
+                subset=True,
+                dataset_size=10000
             )
 
             # Record
