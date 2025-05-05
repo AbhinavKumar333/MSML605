@@ -5,6 +5,7 @@ from experiments.cpu_batch_sweep import batch_size_sweep
 from experiments.optuna_tuning import run_optuna_tuning
 from experiments.gpu_batch_sweep import batch_size_sweep_gpu
 from experiments.gpu_optuna_tuning import run_gpu_optuna_tuning
+from experiments.full_comparisons import run_full_optimization_comparison
 from Features.cpu_optimized import train_cpu_model
 from Features.gpu_optimized import train_gpu_model
 from Utils.caching_results import save_results
@@ -13,6 +14,7 @@ from Utils.caching_results import save_results
 RUN_MODULES = {
     "CPU": {"sweep": batch_size_sweep, "tune": run_optuna_tuning, "single": train_cpu_model},
     "GPU": {"sweep": batch_size_sweep_gpu, "tune": run_gpu_optuna_tuning, "single": train_gpu_model},
+    "ALL": {"full-compare": run_full_optimization_comparison}
 }
 
 
@@ -20,11 +22,11 @@ def get_args():
     parser = argparse.ArgumentParser(description="CPU Optimization Benchmark Driver")
 
     """ Required for every run """
-    parser.add_argument('--mode', type=str, choices=['sweep', 'tune', 'single'], required=True,
+    parser.add_argument('--mode', type=str, choices=['sweep', 'tune', 'single', 'full-compare'], required=True,
                         help='Mode: sweep = batch size sweep, tune = optuna tuning, single = run single config')
-    parser.add_argument('--hardware', type=str, choices=['CPU', 'GPU'], required=True,
+    parser.add_argument('--hardware', type=str, choices=['CPU', 'GPU', 'ALL'], required=True,
                         help='Which hardare being used to run')
-    
+
     """ Only Valid If running in single mode """
     parser.add_argument('--subset', type=bool, default=False, help='Flag to enable reduce dataset size')
     parser.add_argument('--dataset_size', type=int, default=5000, help='Reducing the dataset for quick runs')
@@ -37,9 +39,9 @@ def get_args():
 
 
 def main():
-    
+
     args = get_args()
-    
+
     module = RUN_MODULES[args.hardware.upper()].get(args.mode)
     print("\nRunning {} on {}".format(args.mode, args.hardware))
     print("CUDA available:", torch.cuda.is_available())
@@ -47,7 +49,7 @@ def main():
         print("GPU Name:", torch.cuda.get_device_name(0))
 
     if args.mode == 'single':
-        
+
         result = module(
             subset=args.subset,
             dataset_size=args.dataset_size,
@@ -61,9 +63,9 @@ def main():
         print("\nSingle Run Result:")
         print(result)
         save_results(args.hardware, result)
-    
+
     else:
-        
+
         result = module()
         save_results(args.hardware, result)
 
@@ -71,6 +73,10 @@ def main():
 if __name__ == "__main__":
     main()
 
+# To run the script, use the following command line arguments:
+
+# Full comparison:
+#python driver.py --hardware ALL --mode full-compare
 
 # Batch sweep:
 # python driver.py --hardware CPU --mode sweep

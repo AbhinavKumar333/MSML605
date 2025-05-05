@@ -41,34 +41,35 @@ def plot_all_comparisons(comparisons):
         "Peak Memory Usage (MB)": ("peak_memory_MB", "MB", None, None),
     }
 
-    for model_name, default_result, tuned_result in comparisons:
-        valid_metrics = []
-        for title, (key, unit, _, _) in metrics.items():
-            d_val = default_result.get(key, 0)
-            t_val = tuned_result.get(key, 0)
-            if d_val != 0 or t_val != 0:
-                valid_metrics.append((title, key, unit))
-
+    for model_name, runs in comparisons:
         cols = 2
-        rows = (len(valid_metrics) + 1) // 2
+        rows = (len(metrics) + 1) // 2
         fig, axs = plt.subplots(rows, cols, figsize=(12, 5 * rows))
         axs = axs.flatten()
 
-        for idx, (title, key, unit) in enumerate(valid_metrics):
-            d_val = default_result.get(key, 0)
-            t_val = tuned_result.get(key, 0)
-            axs[idx].bar(["Default", "Tuned"], [d_val, t_val], color=["blue", "green"])
-            axs[idx].set_title(title)
-            axs[idx].set_ylabel(unit)
+        for idx, (title, (key, unit, _, _)) in enumerate(metrics.items()):
+            labels = []
+            values = []
 
-        for j in range(len(valid_metrics), len(axs)):
+            for label, result in runs:
+                value = result.get(key)
+                if value is not None:
+                    labels.append(label)
+                    values.append(value)
+
+            if labels:
+                axs[idx].bar(labels, values, color='skyblue')
+                axs[idx].set_title(title)
+                axs[idx].set_ylabel(unit)
+                axs[idx].tick_params(axis='x', rotation=20)
+
+        for j in range(len(metrics), len(axs)):
             fig.delaxes(axs[j])
 
         plt.suptitle(f"Performance Comparison for {model_name}", fontsize=16)
         plt.tight_layout()
-
     plt.show()
-
+    
 # ========================================
 # Plot: Batch Size Sweep Results (Multiple Models)
 # ========================================

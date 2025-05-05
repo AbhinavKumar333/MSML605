@@ -58,10 +58,19 @@ def run_gpu_optuna_tuning():
             dataset_size=5000
         )
 
-        comparisons.append((model_variant.upper(), default_result, tuned_result))
+        # ✅ Format for updated plot_all_comparisons
+        comparisons.append((
+            model_variant.upper(),
+            [
+                ("Default", default_result),
+                ("Tuned", tuned_result)
+            ]
+        ))
+
+        # Optional per-model optimization history
+        plot_optimization_history(study)
 
     plot_all_comparisons(comparisons)
-    plot_optimization_history(study)
 
 
 if __name__ == "__main__":
