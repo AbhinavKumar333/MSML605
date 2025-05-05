@@ -15,32 +15,37 @@ def run_full_optimization_comparison():
         print(f"==========================")
         runs = []
 
-        # CPU Default
-        print(" Running CPU Default...")
-        cpu_default = train_cpu_model(
-            model_variant=model, subset=True, dataset_size=5000,
-            quantize=False, verbose=True
-        )
-        runs.append(("CPU Default", cpu_default))
+        # # CPU Default
+        # print(" Running CPU Default...")
+        # cpu_default = train_cpu_model(
+        #     model_variant=model, subset=True, dataset_size=5000,
+        #     quantize=False, verbose=True, epochs=5
+        # )
+        # runs.append(("CPU Default", cpu_default))
 
-        # CPU Quantized
-        print(" Running CPU Quantized...")
-        cpu_quant = train_cpu_model(
-            model_variant=model, subset=True, dataset_size=5000,
-            quantize=True, verbose=True
-        )
-        runs.append(("CPU Quantized", cpu_quant))
+        # # CPU Quantized
+        # print(" Running CPU Quantized...")
+        # cpu_quant = train_cpu_model(
+        #     model_variant=model, subset=True, dataset_size=5000,
+        #     quantize=True, verbose=True, epochs=5
+        # )
+        # runs.append(("CPU Quantized", cpu_quant))
 
         # CPU Tuning
         print(" Running Optuna Tuning for CPU...")
         def cpu_objective(trial):
-            bs = trial.suggest_categorical('batch_size', [8, 16, 32, 64, 128])
-            lr = trial.suggest_loguniform('lr', 1e-4, 1e-1)
+            batch_size = trial.suggest_categorical("batch_size", [8, 16, 32, 64, 128])
+            learning_rate = trial.suggest_loguniform("learning_rate", 1e-4, 1e-1)
+
             result = train_cpu_model(
+                batch_size=batch_size,
+                learning_rate=learning_rate,
                 model_variant=model,
-                batch_size=bs, learning_rate=lr,
-                subset=True, dataset_size=5000,
-                quantize=False, verbose=True
+                epochs=5,
+                verbose=True,
+                quantize=False,
+                subset=True,
+                dataset_size=5000,
             )
             return result["accuracy"]
 
@@ -49,11 +54,14 @@ def run_full_optimization_comparison():
         best_cpu_params = cpu_study.best_params
         print(f" Best CPU Params: {best_cpu_params}")
         cpu_tuned = train_cpu_model(
+            batch_size=cpu_study.best_params["batch_size"],
+            epochs=5,
+            learning_rate=cpu_study.best_params["learning_rate"],
             model_variant=model,
-            batch_size=best_cpu_params['batch_size'],
-            learning_rate=best_cpu_params['lr'],
-            subset=True, dataset_size=5000,
-            quantize=False, verbose=True
+            verbose=True,
+            quantize=True,
+            subset=True,
+            dataset_size=5000
         )
         runs.append(("CPU Tuned", cpu_tuned))
 
