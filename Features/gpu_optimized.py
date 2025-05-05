@@ -34,7 +34,12 @@ def train_gpu_model(
     amp=True,
     quantize=False
 ):
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    if torch.backends.mps.is_available() and torch.backends.mps.is_built():
+        device = "mps"
+    elif torch.cuda.is_available():
+        device = "cuda"
+    else:
+        device="cpu"
     print(f"Running on {device.upper()}")
 
     # Load CIFAR-10 dataset

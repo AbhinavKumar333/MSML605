@@ -1,8 +1,17 @@
-
+import torch
 from Features.cpu_optimized import train_cpu_model
 from Utils.printing import print_benchmark_table
 from Utils.plotting import plot_metrics
 
+# ——— Register quantization engine ———
+supported_engines = torch.backends.quantized.supported_engines
+# print(f"Supported quantized engines: {supported_engines}")
+if 'qnnpack' in supported_engines:
+    torch.backends.quantized.engine = 'qnnpack'
+elif 'fbgemm' in supported_engines:
+    torch.backends.quantized.engine = 'fbgemm'
+else:
+    raise RuntimeError(f"No quantization engine available. Supported: {supported_engines}")
 
 def batch_size_sweep(epochs=2, lr=0.001):
     sweep_results = []
