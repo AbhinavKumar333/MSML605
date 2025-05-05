@@ -31,7 +31,7 @@ def plot_metrics(epoch_times, val_accuracies, quantized_accuracies=None, title="
 # ========================================
 # Plot: Default vs Tuned Comparison
 # ========================================
-def plot_full_comparisons(comparisons):
+def plot_all_comparisons(comparisons):
     metrics = {
         "Accuracy (%)": ("accuracy", "%"),
         "Avg Epoch Time (s)": ("avg_epoch_time", "s"),
