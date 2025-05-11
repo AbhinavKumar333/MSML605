@@ -64,7 +64,8 @@ def main():
         save_results(args.hardware, result)
     
     elif args.mode == 'full-compare':
-        module(args.hardware)
+        result = module(args.hardware)
+        save_results(args.hardware, result)
 
     else:
 
@@ -78,7 +79,7 @@ if __name__ == "__main__":
 # To run the script, use the following command line arguments:
 
 # Full comparison:
-#python driver.py --hardware ALL --mode full-compare
+# python driver.py --hardware CPU --mode full-compare
 
 # Batch sweep:
 # python driver.py --hardware CPU --mode sweep
