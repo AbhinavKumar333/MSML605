@@ -24,22 +24,26 @@ def train_and_benchmark(
     val_accuracies = []
     peak_memory_MB = 0
 
-    if use_tracemalloc:
+    is_cuda = device == "cuda"
+    is_mps = device == "mps"
+    is_cpu = device == "cpu"
+
+    if use_tracemalloc and is_cpu:
         tracemalloc.start()
 
-    if device == "cuda":
+    if is_cuda:
         torch.cuda.reset_peak_memory_stats()
 
-    scaler = torch.cuda.amp.GradScaler() if use_amp and device == "cuda" else None
+    scaler = torch.cuda.amp.GradScaler() if use_amp and is_cuda else None
 
     for epoch in range(epochs):
-        if device == "cuda":
+        if is_cuda:
             torch.cuda.reset_peak_memory_stats()
 
         start_time = time.perf_counter()
 
-        # === Training (with optional AMP) ===
-        if use_amp and device == "cuda":
+        # === Training ===
+        if use_amp and is_cuda:
             model.train()
             total_loss = 0
             for inputs, targets in train_loader:
@@ -63,14 +67,15 @@ def train_and_benchmark(
         acc = evaluate(model, test_loader, device=device)
         val_accuracies.append(acc)
 
-        # === Memory ===
-        if device == "cuda":
+        # === Memory Tracking ===
+        if is_cuda:
             mem_bytes = torch.cuda.max_memory_allocated()
-        elif use_tracemalloc:
+        elif use_tracemalloc and is_cpu:
             current, peak = tracemalloc.get_traced_memory()
             mem_bytes = peak
         else:
-            mem_bytes = psutil.Process(os.getpid()).memory_info().rss
+            process = psutil.Process(os.getpid())
+            mem_bytes = process.memory_info().rss
 
         mem_mb = mem_bytes / (1024 * 1024)
         peak_memory_MB = max(peak_memory_MB, mem_mb)
@@ -78,17 +83,17 @@ def train_and_benchmark(
         if verbose:
             print(f"Epoch {epoch+1}/{epochs} - Time: {duration:.2f}s - Acc: {acc:.2f}% - Peak Mem: {mem_mb:.2f} MB")
 
-    if use_tracemalloc:
+    if use_tracemalloc and is_cpu:
         tracemalloc.stop()
 
     # === Quantization ===
     final_model = model
-    if quantize and device == "cpu":
+    if quantize and is_cpu:
         if verbose:
             print("Applying dynamic quantization for final evaluation...")
         final_model = torch.quantization.quantize_dynamic(model, {torch.nn.Linear}, dtype=torch.qint8)
 
-    # === Final Eval and Inference Latency ===
+    # === Final Evaluation and Inference Latency ===
     final_acc = evaluate(final_model, test_loader, device=device)
     start_inf = time.perf_counter()
     _ = evaluate(final_model, test_loader, device=device)

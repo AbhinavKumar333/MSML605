@@ -1,5 +1,7 @@
 # File: experiments/full_comparison.py
 import optuna
+import torch
+from Utils.plotting import plot_all_comparisons
 from Features.cpu_optimized import train_cpu_model
 from Features.gpu_optimized import train_gpu_model
 
@@ -77,8 +79,8 @@ def run_full_optimization_comparison(hardware):
             )
             runs.append(("CPU Tuned", cpu_tuned))
 
-        if hardware.lower() == 'gpu':
 
+        if hardware.lower() == 'gpu':
             # GPU Tuning
             print(" Running Optuna Tuning for GPU...")
             def gpu_objective(trial):
@@ -101,7 +103,7 @@ def run_full_optimization_comparison(hardware):
                 batch_size=best_gpu_params['batch_size'],
                 learning_rate=best_gpu_params['lr'],
                 subset=True, dataset_size=5000,
-                amp=False, verbose=False
+                amp=False, verbose=True
             )
             runs.append(("GPU Tuned", gpu_tuned))
 
@@ -109,4 +111,5 @@ def run_full_optimization_comparison(hardware):
             print(f" Finished Benchmark for {model.upper()}")
 
     print("\n All model comparisons completed.")
+    plot_all_comparisons(comparisons)
     return comparisons

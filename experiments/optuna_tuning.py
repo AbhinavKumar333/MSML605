@@ -9,7 +9,7 @@ def objective(trial, model_variant):
 
     result = train_cpu_model(
         batch_size=batch_size,
-        epochs=10,
+        epochs=5,
         learning_rate=learning_rate,
         verbose=False,
         model_variant=model_variant,
@@ -32,7 +32,7 @@ def objective(trial, model_variant):
         batch_size=batch_size,
         learning_rate=learning_rate,
         model_variant=model_variant,
-        epochs=10,
+        epochs=5,
         verbose=False,
         quantize=False,
         subset=True,
@@ -59,7 +59,7 @@ def run_optuna_tuning():
         print("\nTraining with Default Settings...")
         default_result = train_cpu_model(
             batch_size=32,
-            epochs=10,
+            epochs=5,
             learning_rate=0.001,
             model_variant=model_variant,
             verbose=True,
@@ -91,7 +91,6 @@ def run_optuna_tuning():
             "peak_memory_MB": tuned_result["peak_memory_MB"]
         })
 
-        # ✅ Updated format for plot_all_comparisons
         comparisons.append((
             model_variant.upper(),
             [

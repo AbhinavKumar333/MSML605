@@ -14,7 +14,7 @@ def train_cpu_model(
     dataset_size=5000,
     batch_size=32,
     epochs=2,
-    learning_rate=0.0005,
+    learning_rate=0.001,
     verbose=True,
     model_variant="resnet18",
     quantize=False
