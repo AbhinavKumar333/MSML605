@@ -34,13 +34,16 @@ def train_gpu_model(
     amp=True,
     quantize=False
 ):
+
     if torch.backends.mps.is_available() and torch.backends.mps.is_built():
         device = "mps"
     elif torch.cuda.is_available():
         device = "cuda"
     else:
-        device="cpu"
+        device = "cpu"
     print(f"Running on {device.upper()}")
+    print(f"\n[Model Variant: {model_variant}]")
+    print(f"\n[Batch Size: {batch_size}]")
 
     # Load CIFAR-10 dataset
     train_loader, test_loader = get_cifar10_loaders(

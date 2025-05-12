@@ -12,9 +12,8 @@ from Utils.caching_results import save_results
 
 
 RUN_MODULES = {
-    "CPU": {"sweep": batch_size_sweep, "tune": run_optuna_tuning, "single": train_cpu_model},
-    "GPU": {"sweep": batch_size_sweep_gpu, "tune": run_gpu_optuna_tuning, "single": train_gpu_model},
-    "ALL": {"full-compare": run_full_optimization_comparison}
+    "CPU": {"sweep": batch_size_sweep, "tune": run_optuna_tuning, "single": train_cpu_model, "full-compare": run_full_optimization_comparison},
+    "GPU": {"sweep": batch_size_sweep_gpu, "tune": run_gpu_optuna_tuning, "single": train_gpu_model, "full-compare": run_full_optimization_comparison}
 }
 
 
@@ -63,6 +62,10 @@ def main():
         print("\nSingle Run Result:")
         print(result)
         save_results(args.hardware, result)
+    
+    elif args.mode == 'full-compare':
+        result = module(args.hardware)
+        save_results(args.hardware, result)
 
     else:
 
@@ -76,7 +79,7 @@ if __name__ == "__main__":
 # To run the script, use the following command line arguments:
 
 # Full comparison:
-#python driver.py --hardware ALL --mode full-compare
+# python driver.py --hardware CPU --mode full-compare
 
 # Batch sweep:
 # python driver.py --hardware CPU --mode sweep

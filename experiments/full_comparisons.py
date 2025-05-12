@@ -5,7 +5,7 @@ from Utils.plotting import plot_all_comparisons
 from Features.cpu_optimized import train_cpu_model
 from Features.gpu_optimized import train_gpu_model
 
-def run_full_optimization_comparison():
+def run_full_optimization_comparison(hardware):
     model_variants = ["resnet18", "mobilenetv2"]
     comparisons = []
 
@@ -15,62 +15,31 @@ def run_full_optimization_comparison():
         print(f"==========================")
         runs = []
 
-        # # CPU Default
-        # print(" Running CPU Default...")
-        # cpu_default = train_cpu_model(
-        #     model_variant=model, subset=True, dataset_size=5000,
-        #     quantize=False, verbose=True, epochs=5
-        # )
-        # runs.append(("CPU Default", cpu_default))
+        if hardware.lower() == 'cpu':
 
-        # # CPU Quantized
-        # print(" Running CPU Quantized...")
-        # cpu_quant = train_cpu_model(
-        #     model_variant=model, subset=True, dataset_size=5000,
-        #     quantize=True, verbose=True, epochs=5
-        # )
-        # runs.append(("CPU Quantized", cpu_quant))
-
-        # CPU Tuning
-        print(" Running Optuna Tuning for CPU...")
-        def cpu_objective(trial):
-            batch_size = trial.suggest_categorical("batch_size", [8, 16, 32, 64, 128])
-            learning_rate = trial.suggest_loguniform("learning_rate", 1e-4, 1e-1)
-
-            result = train_cpu_model(
-                batch_size=batch_size,
-                learning_rate=learning_rate,
-                model_variant=model,
-                epochs=5,
-                verbose=True,
-                quantize=False,
-                subset=True,
-                dataset_size=5000,
+            # CPU Default
+            print(" Running CPU Default...")
+            cpu_default = train_cpu_model(
+                model_variant=model, subset=True, dataset_size=5000,
+                quantize=False, verbose=False
             )
-            return result["accuracy"]
+            runs.append(("CPU Default", cpu_default))
 
-        cpu_study = optuna.create_study(direction="maximize")
-        cpu_study.optimize(cpu_objective, n_trials=5)
-        best_cpu_params = cpu_study.best_params
-        print(f" Best CPU Params: {best_cpu_params}")
-        cpu_tuned = train_cpu_model(
-            batch_size=cpu_study.best_params["batch_size"],
-            epochs=5,
-            learning_rate=cpu_study.best_params["learning_rate"],
-            model_variant=model,
-            verbose=True,
-            quantize=True,
-            subset=True,
-            dataset_size=5000
-        )
-        runs.append(("CPU Tuned", cpu_tuned))
+            # CPU Quantized
+            print(" Running CPU Quantized...")
+            cpu_quant = train_cpu_model(
+                model_variant=model, subset=True, dataset_size=5000,
+                quantize=True, verbose=False
+            )
+            runs.append(("CPU Quantized", cpu_quant))
 
-        if torch.cuda.is_available() or (torch.backends.mps.is_available() and torch.backends.mps.is_built()):
+        if hardware.lower() == 'gpu':
+
             # GPU Default
             print(" Running GPU Default...")
             gpu_default = train_gpu_model(
                 model_variant=model, subset=True, dataset_size=5000,
-                amp=False, verbose=True
+                amp=False, verbose=False
             )
             runs.append(("GPU", gpu_default))
 
@@ -78,10 +47,40 @@ def run_full_optimization_comparison():
             print(" Running GPU with AMP...")
             gpu_amp = train_gpu_model(
                 model_variant=model, subset=True, dataset_size=5000,
-                amp=True, verbose=True
+                amp=True, verbose=False
             )
             runs.append(("GPU AMP", gpu_amp))
 
+        if hardware.lower() == 'cpu':
+        
+            # CPU Tuning
+            print(" Running Optuna Tuning for CPU...")
+            def cpu_objective(trial):
+                bs = trial.suggest_categorical('batch_size', [8, 16, 32, 64, 128])
+                lr = trial.suggest_loguniform('lr', 1e-4, 1e-1)
+                result = train_cpu_model(
+                    model_variant=model,
+                    batch_size=bs, learning_rate=lr,
+                    subset=True, dataset_size=5000,
+                    quantize=False, verbose=False
+                )
+                return result["accuracy"]
+
+            cpu_study = optuna.create_study(direction="maximize")
+            cpu_study.optimize(cpu_objective, n_trials=5)
+            best_cpu_params = cpu_study.best_params
+            print(f" Best CPU Params: {best_cpu_params}")
+            cpu_tuned = train_cpu_model(
+                model_variant=model,
+                batch_size=best_cpu_params['batch_size'],
+                learning_rate=best_cpu_params['lr'],
+                subset=True, dataset_size=5000,
+                quantize=False, verbose=False
+            )
+            runs.append(("CPU Tuned", cpu_tuned))
+
+
+        if hardware.lower() == 'gpu':
             # GPU Tuning
             print(" Running Optuna Tuning for GPU...")
             def gpu_objective(trial):
@@ -91,7 +90,7 @@ def run_full_optimization_comparison():
                     model_variant=model,
                     batch_size=bs, learning_rate=lr,
                     subset=True, dataset_size=5000,
-                    amp=False, verbose=True
+                    amp=False, verbose=False
                 )
                 return result["accuracy"]
 
@@ -108,8 +107,8 @@ def run_full_optimization_comparison():
             )
             runs.append(("GPU Tuned", gpu_tuned))
 
-        comparisons.append((model.upper(), runs))
-        print(f" Finished Benchmark for {model.upper()}")
+            comparisons.append((model.upper(), runs))
+            print(f" Finished Benchmark for {model.upper()}")
 
     print("\n All model comparisons completed.")
     plot_all_comparisons(comparisons)
