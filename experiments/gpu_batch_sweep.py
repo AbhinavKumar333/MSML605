@@ -2,22 +2,32 @@ from Features.gpu_optimized import train_gpu_model
 from Utils.plotting import plot_batchsize_sweep
 
 
-def batch_size_sweep_gpu(subset=False, dataset_size=5000, epochs=10, learning_rate=0.0005):
-    batch_sizes = [8, 16, 32, 64, 128]
-    models = ["resnet18", "mobilenetv2"]
-    results = []
+def batch_size_sweep_gpu():
+    batch_sizes = [16, 32, 64, 128]
+    model_variants = ["resnet18", "mobilenetv2"]
+    all_results = []
 
-    for model_variant in models:
-        print(f"\n🚀 Benchmarking {model_variant} on GPU...")
+    print("=== Starting GPU Batch Size Sweep ===")
+
+    for model_variant in model_variants:
+        print(f"\n Benchmarking {model_variant.upper()} on GPU...")
         for batch_size in batch_sizes:
-            result = train_gpu_model( subset=subset, dataset_size=dataset_size,
-                batch_size=batch_size, model_variant=model_variant,
-                epochs=epochs, learning_rate=learning_rate, verbose=True
+            print(f"Batch Size: {batch_size}")
+            result = train_gpu_model(
+                batch_size=batch_size,
+                model_variant=model_variant,
+                epochs=10,
+                learning_rate=0.0005,
+                subset=False,
+                verbose=True
             )
-            result["model"] = model_variant
-            result["batch_size"] = batch_size  
-            results.append(result)
-    print(results)
-    plot_batchsize_sweep(results, title="GPU Optimization Sweep")
+            result.update({
+                "model": model_variant,
+                "batch_size": batch_size
+            })
+            all_results.append(result)
 
-    return result
+    # Plot all results at once (non-blocking)
+    plot_batchsize_sweep(all_results, title="GPU Optimization Sweep")
+
+    return all_results

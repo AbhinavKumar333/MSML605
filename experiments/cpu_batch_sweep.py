@@ -1,10 +1,20 @@
-
+import torch
 from Features.cpu_optimized import train_cpu_model
 from Utils.printing import print_benchmark_table
 from Utils.plotting import plot_metrics
 
+# ——— Register quantization engine ———
+supported_engines = torch.backends.quantized.supported_engines
+# print(f"Supported quantized engines: {supported_engines}")
+if 'qnnpack' in supported_engines:
+    torch.backends.quantized.engine = 'qnnpack'
+elif 'fbgemm' in supported_engines:
+    torch.backends.quantized.engine = 'fbgemm'
+else:
+    raise RuntimeError(f"No quantization engine available. Supported: {supported_engines}")
 
-def batch_size_sweep(subset=False, dataset_size=5000, epochs=2, learning_rate=0.0005):
+    
+def batch_size_sweep(epochs=2, lr=0.001):
     sweep_results = []
     batch_sizes = [8, 16, 32, 64, 128]
     # batch_sizes = [8, 32]  # Reduced for faster testing
@@ -24,7 +34,15 @@ def batch_size_sweep(subset=False, dataset_size=5000, epochs=2, learning_rate=0.
             # result = train_cpu_model(batch_size=bs, epochs=epochs, learning_rate=lr, model_variant=model_variant, quantize=False)
 
             # Quantized evaluation
-            result = train_cpu_model(subset=subset, dataset_size=dataset_size, batch_size=bs, epochs=epochs, learning_rate=learning_rate, model_variant=model_variant, quantize=True, verbose=True)
+            result = train_cpu_model(
+                batch_size=bs,
+                epochs=epochs,
+                learning_rate=lr,
+                model_variant=model_variant,
+                quantize=True,
+                subset=True,
+                dataset_size=10000
+            )
 
             # Record
             sweep_results.append({
@@ -32,7 +50,7 @@ def batch_size_sweep(subset=False, dataset_size=5000, epochs=2, learning_rate=0.
                 "batch_size": bs,
                 "avg_epoch_time": result["avg_epoch_time"],
                 "accuracy": result["accuracy"],
-                "quantized_accuracy": result["accuracy"]
+                "quantized_accuracy": result["quantized_accuracy"]
             })
     print_benchmark_table(sweep_results)
 
