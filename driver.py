@@ -52,7 +52,7 @@ def main():
         result = module(
             subset=args.subset,
             dataset_size=args.dataset_size,
-            batch_size=args.batch_size,
+            batch_size=128,
             epochs=args.epochs,
             learning_rate=args.learning_rate,
             model_variant=args.model,
@@ -68,7 +68,6 @@ def main():
         save_results(args.hardware, result)
 
     else:
-
         result = module()
         save_results(args.hardware, result)
 

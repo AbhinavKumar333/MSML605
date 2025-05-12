@@ -15,12 +15,10 @@ module load python/3.10.10
 
 source /home/ak395/scratch.msml605/MSML605/gpu_venv/bin/activate
 
-pip install -r gpu_requirements.txt
-
 cd /home/ak395/scratch.msml605/MSML605
 
 nvidia-smi
 
-python driver.py --hardware GPU --mode single --model resnet18 --subset True --dataset_size 5000 --batch_size 128 --learning_rate 0.0005  --epochs 10
+python driver.py --hardware GPU --mode single --model resnet18 --subset True --dataset_size 5000 --epochs 10 --learning_rate 0.0005
 
 deactivate

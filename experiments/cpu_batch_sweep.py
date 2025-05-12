@@ -13,6 +13,7 @@ elif 'fbgemm' in supported_engines:
 else:
     raise RuntimeError(f"No quantization engine available. Supported: {supported_engines}")
 
+    
 def batch_size_sweep(epochs=2, lr=0.001):
     sweep_results = []
     batch_sizes = [8, 16, 32, 64, 128]

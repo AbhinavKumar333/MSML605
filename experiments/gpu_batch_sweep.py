@@ -1,6 +1,7 @@
 from Features.gpu_optimized import train_gpu_model
 from Utils.plotting import plot_batchsize_sweep
 
+
 def batch_size_sweep_gpu():
     batch_sizes = [16, 32, 64, 128]
     model_variants = ["resnet18", "mobilenetv2"]

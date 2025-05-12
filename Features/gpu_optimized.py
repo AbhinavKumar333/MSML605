@@ -22,7 +22,6 @@ def build_model(model_variant, model_args):
     else:
         raise ValueError(f"Unknown model variant: {model_variant}")
 
-
 def train_gpu_model(
     subset=False,
     dataset_size=5000,

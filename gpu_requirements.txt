@@ -1,9 +1,13 @@
-numpy
-matplotlib
-scikit-learn
-tqdm
-Pillow
-typing-extensions
-pandas
+--extra-index-url https://download.pytorch.org/whl/cu121
+torch==2.1.0+cu121
+torchvision==0.16.0+cu121
+torchaudio==2.1.0+cu121
+numpy>=1.23.0
+matplotlib>=3.5.0
+scikit-learn>=1.2.0
+tqdm>=4.64.0
+Pillow>=9.0.0
+typing-extensions>=4.5.0
 optuna
 memory_profiler
+pandas
