@@ -21,7 +21,7 @@ def run_full_optimization_comparison(hardware):
             print(" Running CPU Default...")
             cpu_default = train_cpu_model(
                 model_variant=model, subset=True, dataset_size=5000,
-                quantize=False, verbose=False
+                quantize=False, verbose=True
             )
             runs.append(("CPU Default", cpu_default))
 
@@ -29,7 +29,7 @@ def run_full_optimization_comparison(hardware):
             print(" Running CPU Quantized...")
             cpu_quant = train_cpu_model(
                 model_variant=model, subset=True, dataset_size=5000,
-                quantize=True, verbose=False
+                quantize=True, verbose=True
             )
             runs.append(("CPU Quantized", cpu_quant))
 
@@ -39,7 +39,7 @@ def run_full_optimization_comparison(hardware):
             print(" Running GPU Default...")
             gpu_default = train_gpu_model(
                 model_variant=model, subset=True, dataset_size=5000,
-                amp=False, verbose=False
+                amp=False, verbose=True
             )
             runs.append(("GPU", gpu_default))
 
@@ -47,7 +47,7 @@ def run_full_optimization_comparison(hardware):
             print(" Running GPU with AMP...")
             gpu_amp = train_gpu_model(
                 model_variant=model, subset=True, dataset_size=5000,
-                amp=True, verbose=False
+                amp=True, verbose=True
             )
             runs.append(("GPU AMP", gpu_amp))
 
@@ -62,7 +62,7 @@ def run_full_optimization_comparison(hardware):
                     model_variant=model,
                     batch_size=bs, learning_rate=lr,
                     subset=True, dataset_size=5000,
-                    quantize=False, verbose=False
+                    quantize=False, verbose=True
                 )
                 return result["accuracy"]
 
@@ -75,7 +75,7 @@ def run_full_optimization_comparison(hardware):
                 batch_size=best_cpu_params['batch_size'],
                 learning_rate=best_cpu_params['lr'],
                 subset=True, dataset_size=5000,
-                quantize=False, verbose=False
+                quantize=False, verbose=True
             )
             runs.append(("CPU Tuned", cpu_tuned))
 
@@ -90,7 +90,7 @@ def run_full_optimization_comparison(hardware):
                     model_variant=model,
                     batch_size=bs, learning_rate=lr,
                     subset=True, dataset_size=5000,
-                    amp=False, verbose=False
+                    amp=False, verbose=True
                 )
                 return result["accuracy"]
 

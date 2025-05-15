@@ -87,7 +87,10 @@ if __name__ == "__main__":
 # python driver.py --hardare CPU --mode tune
 
 # Single VGG16 training:
-# python driver.py --hardware CPU --mode single --model vgg16 --subset True --dataset_size 5000 --batch_size 64 --learning_rate 0.001
+# python driver.py --hardware CPU --mode single --model resnet18 --subset True --dataset_size 5000 --batch_size 64 --learning_rate 0.001
 
 # Single ResNet18 training:
 # python driver.py --hardware GPU --mode single --model resnet18 --subset True --dataset_size 5000 --batch_size 32 --learning_rate 0.0005
+
+# Docker runs:
+# docker run --rm -v /local/data:/data ak395/myapp:cpu-latest

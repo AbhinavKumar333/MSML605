@@ -15,7 +15,7 @@ def objective(trial, model_variant):
         amp=True,
         subset=True,
         epochs=10,
-        verbose=False,
+        verbose=True,
         dataset_size=5000
     )
     return result["accuracy"]
